@@ -18,7 +18,9 @@ mkdir
 mkisofs
 mypy
 prebuilt
+py
 rpmspec
+repo
 scality
 sls
 timestamp
