@@ -4,6 +4,11 @@ set -e
 set -u
 set -o pipefail
 
+buildmeta() {
+    set -x
+    su -l build -c "rpmspec -P ${SPEC} > ${META_DIR}/${META_NAME}"
+}
+
 buildsrpm() {
     set -x
     chown build:build /home/build
@@ -125,6 +130,9 @@ download_packages() {
 }
 
 case ${1:-''} in
+    buildmeta)
+        buildmeta
+        ;;
     buildrpm)
         buildrpm
         ;;
