@@ -25,6 +25,7 @@ mypy
 prebuilt
 readonly
 rpmspec
+rpmlint
 scality
 sls
 timestamp
