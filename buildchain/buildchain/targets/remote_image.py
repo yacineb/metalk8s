@@ -14,10 +14,10 @@ import operator
 from pathlib import Path
 from typing import Any, Optional, List
 
-from buildchain import config
 from buildchain import coreutils
 from buildchain import types
 from buildchain import utils
+from buildchain.docker_command import PullCommand, TagCommand
 
 from . import image
 
@@ -90,16 +90,33 @@ class RemoteImage(image.ContainerImage):
         return utils.title_with_target1('IMG PULL', task)
 
     def _build_actions(self) -> List[types.Action]:
+        """Compute actions for the image - pull, tag, save."""
         filepath = self.uncompressed_filename
+        pull_command = PullCommand(
+            repository=self.repository, digest=self.digest
+        )
+        if self.for_containerd:
+            repository = '{img.registry}/{img.name}'.format(img=self)
+        else:
+            repository = self.name
+        tag_command = TagCommand(
+            repository=repository, fullname=self.fullname, version=self.version
+        )
+
         actions : List[types.Action] = [
-            [config.DOCKER, 'pull', self.fullname],
-            [config.DOCKER, 'tag', self.fullname, self.tag],
-            [config.DOCKER, 'save', self.tag, '-o', str(filepath)],
+            (pull_command, [], {}),
+            (tag_command, [], {}),
+            (self.save_image, [], {'save_path': filepath})
         ]
         # containerd doesn't support compressed images.
         if not self.for_containerd:
             actions.append((coreutils.gzip, [filepath], {}))
         return actions
+
+    @property
+    def repository(self) -> str:
+        """Image repository."""
+        return '{obj.registry}/{obj._remote_name}'.format(obj=self)
 
     @property
     def tag(self) -> str:

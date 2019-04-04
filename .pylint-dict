@@ -19,6 +19,7 @@ mkisofs
 mypy
 prebuilt
 rpmspec
+rpmlint
 scality
 sls
 timestamp

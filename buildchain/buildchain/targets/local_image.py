@@ -17,10 +17,10 @@ import operator
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from buildchain import config
 from buildchain import constants
 from buildchain import coreutils
 from buildchain import types
+from buildchain.docker_command import BuildCommand
 
 from . import image
 
@@ -84,22 +84,24 @@ class LocalImage(image.ContainerImage):
 
     def _build_actions(self) -> List[types.Action]:
         """Build a container image locally."""
-        build_cmd = [
-            config.DOCKER, 'build',
-            '--tag', self.tag,
-            '--file', self.dockerfile,
-        ]
-        for arg, value in self.build_args.items():
-            build_cmd.extend(['--build-arg', '{}={}'.format(arg, value)])
-        build_cmd.append(self.dockerfile.parent)
+        actions : List[types.Action] = []
 
-        actions : List[types.Action] = [build_cmd]
+        # actions.append(self.check_dockerfile_dependencies)
+
+        builder = BuildCommand(
+            tag=self.tag,
+            path=self.dockerfile.parent,
+            dockerfile=self.dockerfile,
+            args=self.build_args
+        )
+        actions.append((builder, [], {}))
+
         # If a destination is defined, let's save the image there.
         if self.save_on_disk:
             filepath = self.uncompressed_filename
-            actions.append([
-                config.DOCKER, 'save', self.tag, '-o', str(filepath)
-            ])
+            actions.append(
+                (self.save_image, [], {'save_path': str(filepath)})
+            )
             actions.append((coreutils.gzip, [filepath], {}))
         else:
             # If we don't save the image, at least we touch a file
