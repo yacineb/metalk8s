@@ -3,13 +3,14 @@
 
 """Base class for container images."""
 
-
 import operator
-from typing import Any
+from typing import Any, Union
 from pathlib import Path
 
-from . import base
+from buildchain.types import TaskError
+from buildchain.docker_command import SaveCommand
 
+from . import base
 
 # File extension used by compressed images.
 COMPRESSED_FILEEXT = '.gz'
@@ -69,3 +70,8 @@ class ContainerImage(base.FileTarget):
     def tag(self) -> str:
         """Image tag."""
         return '{img.name}:{img.version}'.format(img=self)
+
+    def save_image(self, save_path: Path) -> Union[TaskError, bool]:
+        """Save a previously created and tagged image"""
+        saver = SaveCommand(tag=self.tag, save_path=save_path)
+        return saver()
