@@ -1,13 +1,13 @@
-{%- set control_plane_ips = salt.saltutil.runner('mine.get', tgt='*', fun='control_plane_ips') %}
+{%- set control_plane_ips = salt.saltutil.runner('mine.get', tgt='*', fun='control_plane_ip') %}
 
 {%- if pillar['bootstrap_id'] in control_plane_ips.keys() and control_plane_ips[pillar['bootstrap_id']] %}
-{%- set bootstrap_ip = control_plane_ips[pillar['bootstrap_id']][0] %}
+{%- set bootstrap_ip = control_plane_ips[pillar['bootstrap_id']] %}
 {%- else %}
 {%- set bootstrap_ip = 'localhost' %}
 {%- endif %}
 
 {%- if pillar['node_name'] in control_plane_ips.keys() and control_plane_ips[pillar['node_name']] %}
-{%- set node_ip = control_plane_ips[pillar['node_name']][0] %}
+{%- set node_ip = control_plane_ips[pillar['node_name']] %}
 {%- else %}
 {%- set node_ip = 'localhost' %}
 {%- endif %}
