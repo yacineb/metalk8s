@@ -1,10 +1,13 @@
-{% from "metalk8s/registry/macro.sls" import kubernetes_image with context %}
+{%- from "metalk8s/registry/macro.sls" import kubernetes_image with context %}
 {%- from "metalk8s/map.jinja" import networks with context %}
+
+include:
+  - metalk8s.req.python-kubernetes
 
 {%- set image = kubernetes_image("kube-proxy") -%}
 
-{% set kubeconfig = "/etc/kubernetes/admin.conf" %}
-{% set context = "kubernetes-admin@kubernetes" %}
+{%- set kubeconfig = "/etc/kubernetes/admin.conf" %}
+{%- set context = "kubernetes-admin@kubernetes" %}
 
 {#- TODO: Not always use local machine as apiserver #}
 {%- set apiserver = 'https://' ~ salt['network.ip_addrs'](cidr=networks.control_plane)[0] ~ ':6443' %}
@@ -15,6 +18,8 @@ Deploy kube-proxy (ServiceAccount):
     - kubeconfig: {{ kubeconfig }}
     - context: {{ context }}
     - namespace: kube-system
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Deploy kube-proxy (ClusterRoleBinding):
   kubernetes.clusterrolebinding_present:
@@ -29,8 +34,8 @@ Deploy kube-proxy (ClusterRoleBinding):
       - kind: ServiceAccount
         name: kube-proxy
         namespace: kube-system
-
     - require:
+      - pkg: Install Python Kubernetes client
       - kubernetes: Deploy kube-proxy (ServiceAccount)
 
 Deploy kube-proxy (ConfigMap):
@@ -102,6 +107,8 @@ Deploy kube-proxy (ConfigMap):
           - name: default
             user:
               tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Deploy kube-proxy (DaemonSet):
   kubernetes.daemonset_present:
@@ -169,8 +176,8 @@ Deploy kube-proxy (DaemonSet):
               name: lib-modules
         updateStrategy:
           type: RollingUpdate
-
     - require:
+      - pkg: Install Python Kubernetes client
       - kubernetes: Deploy kube-proxy (ServiceAccount)
       - kubernetes: Deploy kube-proxy (ClusterRoleBinding)
       - kubernetes: Deploy kube-proxy (ConfigMap)
@@ -190,6 +197,8 @@ Deploy kube-proxy (Role):
         - configmaps
         verbs:
         - get
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Deploy kube-proxy (RoleBinding):
   kubernetes.rolebinding_present:
@@ -204,6 +213,6 @@ Deploy kube-proxy (RoleBinding):
     - subjects:
       - kind: Group
         name: system:bootstrappers:kubeadm:default-node-token
-
     - require:
+      - pkg: Install Python Kubernetes client
       - kubernetes: Deploy kube-proxy (Role)
