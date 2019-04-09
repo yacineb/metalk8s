@@ -1,5 +1,5 @@
 include:
-  - .installed
+  - metalk8s.req.certs
 
 Create SA private key:
   x509.private_key_managed:
