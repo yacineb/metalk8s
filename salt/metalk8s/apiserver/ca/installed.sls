@@ -1,7 +1,7 @@
 {%- from "metalk8s/map.jinja" import front_proxy with context %}
 
 include:
-  - .installed
+  - metalk8s.req.certs
   - metalk8s.salt.minion.running
 
 Create front proxy CA private key:

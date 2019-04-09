@@ -1,30 +1,35 @@
-{%- from "metalk8s/registry/macro.sls" import kubernetes_image with context -%}
-{% from "metalk8s/map.jinja" import networks with context %}
-{% from "metalk8s/map.jinja" import defaults with context %}
-{% set htpasswd_path = "/etc/kubernetes/htpasswd" %}
+{%- from "metalk8s/registry/macro.sls" import kubernetes_image with context %}
+{%- from "metalk8s/map.jinja" import networks with context %}
+{%- from "metalk8s/map.jinja" import defaults with context %}
+
+{%- set htpasswd_path = "/etc/kubernetes/htpasswd" %}
 
 include:
-  - metalk8s.kubeadm.init.certs.sa-deploy-pub-key
-  - metalk8s.kubeadm.init.certs.front-proxy-deploy-ca-cert
-  - metalk8s.kubeadm.init.certs.etcd-deploy-ca-cert
+  - metalk8s.ca.deployed
+  - metalk8s.etcd.ca.deployed
+  - meltak8s.sa.deployed
+  - .ca.deployed
+  - .certs
 
 Set up default basic auth htpasswd:
   file.managed:
     - name: {{ htpasswd_path }}
-    - source: salt://metalk8s/kubeadm/init/control-plane/files/htpasswd
+    - source: salt://{{ slspath }}/files/htpasswd
     - user: root
     - group: root
     - mode: 600
     - makedirs: True
     - dir_mode: 750
 
-{% set ip_candidates = salt.network.ip_addrs(cidr=networks.control_plane) %}
-{% if ip_candidates %}
-{% set host = ip_candidates[0] %}
+{%- set ip_candidates = salt.network.ip_addrs(cidr=networks.control_plane) %}
+
+{%- if ip_candidates %}
+{%- set host = ip_candidates[0] %}
+
 Create kube-apiserver Pod manifest:
   file.managed:
     - name: /etc/kubernetes/manifests/kube-apiserver.yaml
-    - source: salt://metalk8s/kubeadm/init/control-plane/files/manifest.yaml
+    - source: salt://metalk8s/files/control-plane-manifest.yaml
     - template: jinja
     - user: root
     - group: root
@@ -79,9 +84,11 @@ Create kube-apiserver Pod manifest:
             type: File
             name: htpasswd
     - require:
-      - file: Ensure SA pub key is present
-      - file: Ensure front-proxy CA cert is present
-      - file: Ensure etcd CA cert is present
+      - sls: metalk8s.ca.deployed
+      - sls: metalk8s.etcd.ca.deployed
+      - sls: metalk8s.sa.deployed
+      - sls: metalk8s.apiserver.ca.deployed
+      - file: Set up default basic auth htpasswd
 
 Make sure kube-apiserver container is up:
   module.wait:
@@ -91,8 +98,10 @@ Make sure kube-apiserver container is up:
     - watch:
       - file: Create kube-apiserver Pod manifest
 
-{% else %}
+{%- else %}
+
 No available advertise IP for kube-apiserver:
   test.fail_without_changes:
     - msg: "Could not find available IP in {{ networks.control_plane }}"
-{% endif %}
+
+{%- endif %}

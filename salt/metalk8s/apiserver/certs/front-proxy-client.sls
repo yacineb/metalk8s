@@ -1,7 +1,7 @@
 {%- from "metalk8s/map.jinja" import front_proxy with context %}
 
 include:
-  - .installed
+  - metalk8s.req.certs
 
 Create front proxy client private key:
   x509.private_key_managed:

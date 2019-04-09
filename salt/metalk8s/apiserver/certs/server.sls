@@ -2,7 +2,7 @@
 {%- from "metalk8s/map.jinja" import networks with context %}
 
 include:
-  - .installed
+  - metalk8s.req.certs
 
 Create kube-apiserver private key:
   x509.private_key_managed:
