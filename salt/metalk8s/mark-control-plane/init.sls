@@ -1,7 +1,7 @@
 #
-# State for kubeadm init mark-control-plane phase.
+# State for mark-control-plane phase.
 #
-#
+# Mark the current node as control-plane node
 #
 # Available states
 # ================
@@ -10,5 +10,4 @@
 #
 
 include:
-  - metalk8s.python-kubernetes
   - .configured

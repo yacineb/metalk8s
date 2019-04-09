@@ -1,3 +1,6 @@
+include:
+  - metalk8s.req.python-kubernetes
+
 {% set hostname = pillar.get('mark_control_plane_hostname', salt['network.get_hostname']()) %}
 
 {% set kubeconfig = "/etc/kubernetes/admin.conf" %}
@@ -10,6 +13,8 @@ Apply control-plane master role label:
     - context: {{ context }}
     - node: {{ hostname }}
     - value: ""
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Apply control-plane etcd role label:
   kubernetes.node_label_present:
@@ -18,6 +23,8 @@ Apply control-plane etcd role label:
     - context: {{ context }}
     - node: {{ hostname }}
     - value: ""
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Apply control-plane bootstrap role label:
   kubernetes.node_label_present:
@@ -26,6 +33,8 @@ Apply control-plane bootstrap role label:
     - context: {{ context }}
     - node: {{ hostname }}
     - value: ""
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Apply control-plane bootstrap taint:
   kubernetes.node_taints_present:
@@ -35,6 +44,8 @@ Apply control-plane bootstrap taint:
     - taints:
         - key: "node-role.kubernetes.io/bootstrap"
           effect: "NoSchedule"
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Apply node version label:
   kubernetes.node_label_present:
@@ -43,6 +54,8 @@ Apply node version label:
     - name: "metalk8s.scality.com/version"
     - node: {{ hostname }}
     - value: "@@VERSION"
+    - require:
+      - pkg: Install Python Kubernetes client
 
 Annotate with CRI socket information:
   kubernetes.node_annotation_present:
@@ -53,3 +66,5 @@ Annotate with CRI socket information:
     # TODO: the socket location may become configurable, we should make sure
     #       this value is accurate (hardcoded to the default value for now)
     - value: "/run/containerd/containerd.sock"
+    - require:
+      - pkg: Install Python Kubernetes client
