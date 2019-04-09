@@ -1,7 +1,7 @@
 {%- from "metalk8s/map.jinja" import etcd with context %}
 
 include:
-  - .installed
+  - metalk8s.req.certs
 
 Create etcd healthcheck client private key:
   x509.private_key_managed:
