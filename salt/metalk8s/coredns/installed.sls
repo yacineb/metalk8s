@@ -1,5 +1,8 @@
 {%- from "metalk8s/map.jinja" import coredns with context %}
 
+include:
+  - metalk8s.req.python-kubernetes
+
 {% set kubeconfig = "/etc/kubernetes/admin.conf" %}
 {% set context = "kubernetes-admin@kubernetes" %}
 
@@ -35,7 +38,7 @@ Create coredns deployment:
     - namespace: kube-system
     - kubeconfig: {{ kubeconfig }}
     - context: {{ context }}
-    - source: salt://metalk8s/kubeadm/init/addons/files/coredns_deployment.yaml.j2
+    - source: salt://{{ slspath }}/files/coredns_deployment.yaml.j2
     - template: jinja
   require:
     - kubernetes: Create coredns ConfigMap
