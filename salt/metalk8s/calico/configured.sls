@@ -2,7 +2,7 @@
 {%- from "metalk8s/map.jinja" import defaults with context %}
 
 include:
-  - metalk8s.kubeadm.init.certs.installed
+  - metalk8s.req.certs
 
 Create kubeconf file for calico:
   metalk8s_kubeconfig.managed:
