@@ -1,7 +1,7 @@
 {%- from "metalk8s/map.jinja" import ca with context %}
 
 include:
-  - .installed
+  - metalk8s.req.certs
   - metalk8s.salt.minion.running
 
 Create CA private key:
