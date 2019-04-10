@@ -10,7 +10,7 @@
 Generate package repositories nginx configuration:
   file.managed:
     - name: {{ nginx_configuration_path }}
-    - source: salt://metalk8s/repo/files/nginx.conf.j2
+    - source: salt://{{ slspath }}/files/nginx.conf.j2
     - template: jinja
     - user: root
     - group: root
@@ -18,12 +18,12 @@ Generate package repositories nginx configuration:
     - makedirs: true
     - backup: false
     - defaults:
-        listening_port: {{ repo.port }}
+        listening_port: {{ repo.port }}
 
 Install package repositories manifest:
   file.managed:
     - name: /etc/kubernetes/manifests/package-repositories-pod.yaml
-    - source: salt://metalk8s/repo/files/package-repositories-pod.yaml.j2
+    - source: salt://{{ slspath }}/files/package-repositories-pod.yaml.j2
     - template: jinja
     - user: root
     - group: root
