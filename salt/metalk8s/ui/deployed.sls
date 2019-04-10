@@ -1,8 +1,9 @@
-{% set kubeconfig = "/etc/kubernetes/admin.conf" %}
-{% set context = "kubernetes-admin@kubernetes" %}
+{%- set kubeconfig = "/etc/kubernetes/admin.conf" %}
+{%- set context = "kubernetes-admin@kubernetes" %}
+
 {%- set control_plane_ips = salt.saltutil.runner('mine.get', tgt='*', fun='control_plane_ips') %}
 {%- if pillar['bootstrap_id'] in control_plane_ips.keys() and control_plane_ips[pillar['bootstrap_id']] %}
-{%- set control_plane_ip = control_plane_ips[pillar['bootstrap_id']][0] %}
+  {%- set control_plane_ip = control_plane_ips[pillar['bootstrap_id']][0] %}
 {%- endif %}
 
 Create metalk8s-ui deployment:
@@ -11,7 +12,7 @@ Create metalk8s-ui deployment:
     - namespace: kube-system
     - kubeconfig: {{ kubeconfig }}
     - context: {{ context }}
-    - source: salt://metalk8s/ui/files/metalk8s-ui_deployment.yaml
+    - source: salt://{{ slspath }}/files/metalk8s-ui_deployment.yaml
     - template: jinja
   require:
     - pkg: Install Python Kubernetes client
