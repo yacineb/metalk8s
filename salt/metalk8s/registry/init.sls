@@ -34,7 +34,7 @@ Create OCI registry user:
 Install OCI registry manifest:
   file.managed:
     - name: /etc/kubernetes/manifests/registry.yaml
-    - source: salt://metalk8s/registry/files/registry-pod.yaml.j2
+    - source: salt://{{ slspath }}/files/registry-pod.yaml.j2
     - template: jinja
     - user: root
     - group: root
