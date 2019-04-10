@@ -1,4 +1,6 @@
 import logging
+import os
+
 import salt.utils.files
 import salt.utils.yaml
 
@@ -49,6 +51,35 @@ def _load_ca(config_data):
     }
 
 
+def _get_endpoints(config="/etc/kubernetes/admin.conf",
+                   context="kubernetes-admin@kubernetes",
+                   namespace="kube-system"):
+    """Find out services endpoints."""
+    endpoints = {}
+
+    if 'kubernetes.show_endpoint' not in __salt__ \
+            or not os.path.exists(config):
+        return endpoints
+
+    for service in ('salt-master',):
+        try:
+            endpoint = __salt__['kubernetes.show_endpoint'](
+                name=service,
+                namespace=namespace,
+                kubeconfig=config,
+                context=context
+            )
+            endpoint_ip = endpoint["subsets"][0]["addresses"][0]['ip']
+        except Exception as exc:  # pylint: disable=broad-except
+            log.error(
+                'Unable to get kubernetes endpoints for %s:\n%s', service, exc
+            )
+        else:
+            endpoints.update({service: endpoint_ip})
+
+    return endpoints
+
+
 def ext_pillar(minion_id, pillar, bootstrap_config):
     config = _load_config(bootstrap_config)
 
@@ -56,5 +87,6 @@ def ext_pillar(minion_id, pillar, bootstrap_config):
         'networks': _load_networks(config),
         'metalk8s': {
             'ca': _load_ca(config),
+            'endpoints': _get_endpoints(),
         },
     }
