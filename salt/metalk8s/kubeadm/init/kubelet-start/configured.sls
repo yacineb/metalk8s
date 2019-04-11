@@ -130,5 +130,5 @@ Start and enable kubelet:
 {% else %}
 No available advertise IP for kubelet:
   test.fail_without_changes:
-    - msg: "Could not find available IP in {{ networks.control_plane }}"
+    - comment: "Could not find available IP in {{ networks.control_plane }}"
 {% endif %}
