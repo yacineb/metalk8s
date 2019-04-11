@@ -61,7 +61,7 @@ def _get_endpoints(config="/etc/kubernetes/admin.conf",
             or not os.path.exists(config):
         return endpoints
 
-    for service in ('salt-master', 'registry'):
+    for service in ('salt-master', 'registry', 'package-repositories'):
         try:
             endpoint = __salt__['kubernetes.show_endpoint'](
                 name=service,
