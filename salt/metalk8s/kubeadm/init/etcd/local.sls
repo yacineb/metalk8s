@@ -93,5 +93,5 @@ Advertise etcd node in the mine:
 {% else %}
 No available advertise IP for etcd:
   test.fail_without_changes:
-    - msg: "Could not find available IP in {{ networks.control_plane }}"
+    - comment: "Could not find available IP in {{ networks.control_plane }}"
 {% endif %}
