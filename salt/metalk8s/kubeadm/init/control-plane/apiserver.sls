@@ -94,5 +94,5 @@ Make sure kube-apiserver container is up:
 {% else %}
 No available advertise IP for kube-apiserver:
   test.fail_without_changes:
-    - msg: "Could not find available IP in {{ networks.control_plane }}"
+    - comment: "Could not find available IP in {{ networks.control_plane }}"
 {% endif %}
